@@ -5,26 +5,40 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.util.function.Consumer;
+
 public class Navigator {
     private static Stage stage;
     // biến static để giữ reference đến cửa sổ chính (global)
     public static void setStage(Stage s){
         stage=s;
     }
-    public static void switchScene(String fxml){
+
+    /**
+     *
+     * @param controllerConsumer
+     * @param <T>: kieu controller: dashboardController, SettingController,...
+     */
+    public static <T> void switchScene(String fxml, Consumer<T> controllerConsumer) {
         try {
-            // load file FXML giống hệt code cũ:
-            FXMLLoader loader = new FXMLLoader(Navigator.class.getResource("/"+fxml));
+            FXMLLoader loader = new FXMLLoader(
+                    Navigator.class.getResource("/" + fxml)
+            );
 
             Scene scene = new Scene(loader.load());
 
-            // dùng stage global (không cần lấy từ button nữa):
+            T controller = loader.getController();
+
+            controllerConsumer.accept(controller);
+
             stage.setScene(scene);
-        }
-        catch (Exception e){
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
+    }
 
-
+    public static void switchScene(String fxml) {
+        switchScene(fxml, controller -> {});
     }
 }

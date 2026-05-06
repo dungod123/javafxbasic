@@ -1,6 +1,7 @@
 package com.suka.controller;
 
 
+import com.suka.service.AuthService;
 import com.suka.util.Navigator;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -35,28 +36,13 @@ public class LoginController {
     private void handleLogin(){
         String username = userNameField.getText();
         String password = passwordField.getText();
-        if (username.equals("admin") && password.equals("123")) {
-            /** DOAN CODE NAY LA KHI CHUA TACH RIENG NAVIGATOR:
-            try{
-             //TIM FILE dashboard.fxml
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/dashboard.fxml"));
 
-            //tao object UI
-                Parent root = loader.load();
 
-            //Lấy cửa sổ hiện tại theo: Button → Scene → Stage
-                Stage stage = (Stage) enterButton.getScene().getWindow();
-            //Thay UI
-                stage.setScene(new Scene(root));
-                stage.setTitle("DASHBOARD");
+        if (AuthService.login(username, password)) {
 
-            }
-            catch (Exception e){
-                e.printStackTrace();
-            }
-             */
-
-            Navigator.switchScene("dashboard.fxml");
+            Navigator.switchScene("dashboard.fxml", controller -> {
+                ((dashboardController) controller).setUsername(username);
+            });
         }
         else {
             messageLabel.setText("Wrong username or password");

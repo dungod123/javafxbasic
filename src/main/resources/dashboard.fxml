@@ -6,7 +6,7 @@
 
 <AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.suka.controller.dashboardController">
 
-    <Label layoutX="150" layoutY="180" text="WELCOME TO DASHBOARD" />
+    <Label fx:id="welcomeLabel" alignment="CENTER" layoutX="150.0" layoutY="40.0" prefHeight="40.0" prefWidth="300.0" style="-fx-background-color: #1234;" />
    <Button fx:id="settingButton" alignment="CENTER" layoutX="470.0" layoutY="14.0" mnemonicParsing="false" onAction="#goToSetting" prefHeight="26.0" prefWidth="81.0" text="setting" textAlignment="JUSTIFY" />
 
 </AnchorPane>
