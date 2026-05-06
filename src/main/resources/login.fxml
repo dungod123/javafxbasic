@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.suka.controller.LoginController">
+   <children>
+      <AnchorPane prefHeight="100.0" prefWidth="644.0" style="-fx-background-color: #DC143C;">
+         <children>
+            <ImageView fx:id="imageView" fitHeight="100.0" fitWidth="120.0" layoutX="-8.0" layoutY="8.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../../../../../../Downloads/asuka.jpeg" />
+               </image>
+            </ImageView>
+            <Label alignment="TOP_CENTER" layoutX="219.0" layoutY="20.0" prefHeight="39.0" prefWidth="213.0" text="LOGIN" textFill="#584d6b">
+               <font>
+                  <Font size="26.0" />
+               </font>
+            </Label>
+         </children>
+      </AnchorPane>
+      <TextField fx:id="userNameField" layoutX="172.0" layoutY="160.0" prefHeight="40.0" prefWidth="300.0" promptText="USERNAME" />
+      <Label layoutX="178.0" layoutY="132.0" text="Enter username">
+         <font>
+            <Font size="19.0" />
+         </font>
+      </Label>
+      <Label layoutX="177.0" layoutY="218.0" text="Enter password">
+         <font>
+            <Font size="19.0" />
+         </font>
+      </Label>
+      <Button fx:id="enterButton" layoutX="261.0" layoutY="304.0" mnemonicParsing="false" onAction="#handleLogin" prefHeight="39.0" prefWidth="108.0" text="Enter" textFill="#000fdd" />
+      <PasswordField fx:id="passwordField" layoutX="171.0" layoutY="252.0" prefHeight="40.0" prefWidth="300.0" promptText="PASSWORD" />
+      <Label fx:id="messageLabel" alignment="CENTER" layoutX="144.0" layoutY="106.0" prefHeight="83.0" prefWidth="360.0" style="-fx-background-color: #DC143C;" text="Username or password is wrong" visible="false">
+         <font>
+            <Font size="21.0" />
+         </font>
+      </Label>
+   </children>
+</AnchorPane>
