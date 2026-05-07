@@ -83,9 +83,10 @@ public class UserRepository {
                 User user = new User(
                         rs.getInt("id"),
                         rs.getString("username"),
-                        rs.getString("password"),
                         rs.getString("email"),
-                        rs.getString("role")
+                        rs.getString("role"),
+                        rs.getString("password")
+
                 );
                 users.add(user);
             }
@@ -95,5 +96,66 @@ public class UserRepository {
         }
 
         return users;
+    }
+    public void addUser(User user) {
+
+        String sql =
+                "INSERT INTO users(username, password, email, role) VALUES (?, ?, ?, ?)";
+
+        try (
+                Connection conn = DatabaseConnection.connect();
+                PreparedStatement stmt = conn.prepareStatement(sql)
+        ) {
+
+            stmt.setString(1, user.getUsername());
+
+            stmt.setString(2, user.getPassword());
+
+            stmt.setString(3, user.getEmail());
+
+            stmt.setString(4, user.getRole());
+
+            stmt.executeUpdate();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    public void updateUser(User user) {
+
+        String sql = "UPDATE users SET username = ?, email = ?, role = ? WHERE id = ?";
+
+        try (
+                Connection conn = DatabaseConnection.connect();
+                PreparedStatement stmt = conn.prepareStatement(sql)
+        ) {
+
+            stmt.setString(1, user.getUsername());
+            stmt.setString(2, user.getEmail());
+            stmt.setString(3, user.getRole());
+            stmt.setInt(4, user.getId());
+
+            stmt.executeUpdate();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    public void deleteUser(int id) {
+
+        String sql = "DELETE FROM users WHERE id = ?";
+
+        try (
+                Connection conn = DatabaseConnection.connect();
+                PreparedStatement stmt = conn.prepareStatement(sql)
+        ) {
+
+            stmt.setInt(1, id);
+
+            stmt.executeUpdate();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

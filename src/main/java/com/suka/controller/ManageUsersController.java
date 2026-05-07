@@ -6,12 +6,15 @@ import com.suka.session.Session;
 import com.suka.util.Navigator;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 public class ManageUsersController {
+    private ObservableList<User> users;
     @FXML
     public TableColumn usernameColumn;
     @FXML
@@ -22,7 +25,14 @@ public class ManageUsersController {
     public TableColumn roleColumn;
     @FXML
     public TableView userTable;
+    @FXML
+    private TextField usernameField;
 
+    @FXML
+    private TextField emailField;
+
+    @FXML
+    private TextField roleField;
     private UserRepository userRepository = new UserRepository();
 
     @FXML
@@ -43,13 +53,70 @@ public class ManageUsersController {
 
         //mapping column = getter : id = user.getId()
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-        usernameColumn.setCellValueFactory(new PropertyValueFactory<>("usernameColumn"));
+        usernameColumn.setCellValueFactory(new PropertyValueFactory<>("username"));
         emailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
         roleColumn.setCellValueFactory(new PropertyValueFactory<>("role"));
 
 
-        ObservableList<User> users = FXCollections.observableArrayList(userRepository.getAllUsers());
+        users = FXCollections.observableArrayList(userRepository.getAllUsers());
 
         userTable.setItems(users);
+    }
+
+    @FXML
+    private void handleAdd() {
+
+        User user = new User(
+                usernameField.getText(),
+                emailField.getText(),
+                roleField.getText(),
+                ""
+        );
+
+        userRepository.addUser(user);//userRepository se modify database
+
+        refreshTable();
+    }
+
+    @FXML
+    private void handleUpdate() {
+        /**
+         * chi update object user
+         * Khong chinh sua database (trong user repository se lam )
+         */
+
+        User selectedUser = (User) userTable.getSelectionModel().getSelectedItem();
+
+        if (selectedUser == null) {
+            return;
+        }
+
+        selectedUser.setUsername(usernameField.getText()
+        );
+
+        selectedUser.setEmail(emailField.getText());
+
+        selectedUser.setRole(roleField.getText());
+
+        userRepository.updateUser(selectedUser); //userRepository se modify database
+
+        refreshTable();
+    }
+    @FXML
+    private void handleDelete() {
+
+        User selectedUser = (User) userTable.getSelectionModel().getSelectedItem();
+
+        if (selectedUser == null) {
+            return;
+        }
+
+        userRepository.deleteUser(selectedUser.getId());//userRepository se modify database
+
+        refreshTable();
+    }
+    private void refreshTable() {
+
+        users.setAll(userRepository.getAllUsers());
     }
 }

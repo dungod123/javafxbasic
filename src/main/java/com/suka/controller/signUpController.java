@@ -35,7 +35,7 @@ public class signUpController {
         String username = usernameField.getText();
         String password = passwordField.getText();
 
-        User user = new User(username, email, "User", password);
+        User user = new User(username, email, "USER", password);
 
         AuthService.signUp(user);
 
