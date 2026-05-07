@@ -1,17 +1,14 @@
 package com.suka.service;
 
 import com.suka.model.User;
+import com.suka.repository.UserRepository;
 
 public class AuthService {
+    private static UserRepository userRepository = new UserRepository();
+
     public static User login(String username, String password){
-        if (username.equals("admin") && password.equals("123")){
-            return new User(
-                    1,
-                    "admin",
-                    "admin@gmail.com",
-                    "ADMIN"
-            );
-        }
-        return null;
+
+        return userRepository.login(username,password);
+
     }
 }
