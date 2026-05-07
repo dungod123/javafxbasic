@@ -2,6 +2,7 @@ package com.suka.repository;
 
 import com.suka.model.User;
 import com.suka.util.DatabaseConnection;
+import com.suka.util.PasswordUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,26 +13,31 @@ public class UserRepository {
         /**
          * WHERE user name = ?: prepare statement
          */
-        String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
+        String sql = "SELECT * FROM users WHERE username = ?";
         try (
                 Connection conn = DatabaseConnection.connect();
                 PreparedStatement stmt = conn.prepareStatement(sql)
         ) {
 
             stmt.setString(1, username);
-            stmt.setString(2, password);
+
 
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
 
-                return new User(
-                        rs.getInt("id"),
-                        rs.getString("username"),
-                        rs.getString("email"),
-                        rs.getString("role"),
-                        rs.getString("password")
-                );
+                String hashedPassword = rs.getString("password");
+                boolean correctedPassword = PasswordUtil.verifyPassword(password , hashedPassword);
+
+                if (correctedPassword){
+                    return new User(
+                            rs.getInt("id"),
+                            rs.getString("username"),
+                            rs.getString("email"),
+                            rs.getString("role"),
+                            rs.getString("password")
+                    );
+                }
             }
 
         } catch (Exception e) {
@@ -42,7 +48,7 @@ public class UserRepository {
     }
 
     public void signUp(User user){
-        String sql = "INSERT INTO users VALUES (?, ?,?,?)";
+        String sql = "INSERT INTO users (username, password, email, role) VALUES (?, ?,?,?)";
 
         try (
                 Connection conn = DatabaseConnection.connect();
