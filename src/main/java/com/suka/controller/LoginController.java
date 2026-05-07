@@ -17,7 +17,7 @@ fx:id="userNameField" ↔ private TextField userNameField;
 
 public class LoginController {
     @FXML
-    private TextField userNameField;
+    private TextField nameField;
 
     @FXML
     private TextField passwordField;
@@ -35,7 +35,7 @@ public class LoginController {
 
     @FXML
     private void handleLogin(){
-        String username = userNameField.getText();
+        String username = nameField.getText();
         String password = passwordField.getText();
 
         User user = AuthService.login(username,password);
@@ -56,5 +56,9 @@ public class LoginController {
         }
     }
 
+    @FXML
+    private void goToSignUp(){
+        Navigator.switchScene("signup.fxml");
+    }
 
 }

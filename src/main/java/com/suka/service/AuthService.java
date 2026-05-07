@@ -11,4 +11,8 @@ public class AuthService {
         return userRepository.login(username,password);
 
     }
+
+    public static void signUp(User user){
+        userRepository.signUp(user);
+    }
 }

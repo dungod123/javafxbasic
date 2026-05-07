@@ -29,7 +29,8 @@ public class UserRepository {
                         rs.getInt("id"),
                         rs.getString("username"),
                         rs.getString("email"),
-                        rs.getString("role")
+                        rs.getString("role"),
+                        rs.getString("password")
                 );
             }
 
@@ -38,5 +39,24 @@ public class UserRepository {
         }
 
         return null;
+    }
+
+    public void signUp(User user){
+        String sql = "INSERT INTO users VALUES (?, ?,?,?)";
+
+        try (
+                Connection conn = DatabaseConnection.connect();
+                PreparedStatement stmt = conn.prepareStatement(sql)
+        ) {
+
+            stmt.setString(1, user.getUsername());
+            stmt.setString(2, user.getPassword());
+            stmt.setString(3, user.getEmail());
+            stmt.setString(4, user.getRole());
+
+            int rs = stmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
