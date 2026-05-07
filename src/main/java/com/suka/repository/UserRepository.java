@@ -7,8 +7,13 @@ import com.suka.util.PasswordUtil;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+/**
+ * LOGIC NAM TRONG AuthService va UserRepository chu khong nam trong Controller!!!
+ */
 
 public class UserRepository {
     public User login(String username, String password){
@@ -158,4 +163,25 @@ public class UserRepository {
             e.printStackTrace();
         }
     }
+
+    public boolean updatePassword(String email, String hashedPassword){
+        String sql = "UPDATE users SET password = ? WHERE email = ?";
+
+        try (
+                Connection conn = DatabaseConnection.connect();
+                PreparedStatement stmt = conn.prepareStatement(sql);
+
+        ){
+            stmt.setString(1,hashedPassword);
+            stmt.setString(2,email);
+
+            int rows = stmt.executeUpdate();
+            return rows >0;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }
+

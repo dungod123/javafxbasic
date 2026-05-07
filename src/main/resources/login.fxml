@@ -44,5 +44,6 @@
          </font>
       </Label>
       <Button layoutX="336.0" layoutY="305.0" mnemonicParsing="false" onAction="#goToSignUp" prefHeight="39.0" prefWidth="108.0" text="Signup" />
+      <Button layoutX="246.0" layoutY="360.0" mnemonicParsing="false" onAction="#goToForgotPassword" prefHeight="26.0" prefWidth="129.0" text="Forgot password?" textFill="#bc3939" />
    </children>
 </AnchorPane>

@@ -61,4 +61,7 @@ public class LoginController {
         Navigator.switchScene("signup.fxml");
     }
 
+    @FXML
+    private void goToForgotPassword(){ Navigator.switchScene("forgot-password.fxml");}
+
 }
