@@ -15,6 +15,9 @@ import java.util.List;
  * LOGIC NAM TRONG AuthService va UserRepository chu khong nam trong Controller!!!
  */
 
+/**
+ * Nhien vu cua Repository: Query Database
+ */
 public class UserRepository {
     public User login(String username, String password){
         /**
@@ -181,6 +184,27 @@ public class UserRepository {
         catch (Exception e) {
             e.printStackTrace();
         }
+        return false;
+    }
+
+    public boolean existsByUsername(String username){
+        String sql = "SELECT * FROM users WHERE username = ?";
+        try(
+                Connection conn = DatabaseConnection.connect();
+                PreparedStatement stmt = conn.prepareStatement(sql);
+        )
+        {
+            stmt.setString(1,username);
+
+            ResultSet rs = stmt.executeQuery();
+
+            return rs.next();
+
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+
         return false;
     }
 }

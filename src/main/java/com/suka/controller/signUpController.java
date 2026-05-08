@@ -5,7 +5,9 @@ import com.suka.repository.UserRepository;
 import com.suka.service.AuthService;
 import com.suka.util.Navigator;
 import com.suka.util.PasswordUtil;
+import com.suka.validation.validationResult;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import java.util.Random;
@@ -25,7 +27,10 @@ public class signUpController {
     @FXML
     private TextField usernameField;
 
+    @FXML
+    private Label messageField;
 
+    AuthService authService=new AuthService();
 
     public void handleSignUp(){
 
@@ -35,11 +40,13 @@ public class signUpController {
         String username = usernameField.getText();
         String password = passwordField.getText();
 
-        User user = new User(username, email, "USER", password);
+        //User user = new User(username, email, "USER", password);
 
-        AuthService.signUp(user);
+        validationResult result = authService.signUp(username,password,email);
 
+        messageField.setVisible(true);
+        messageField.setText(result.getMessage());
 
-        Navigator.switchScene("login.fxml");
+        if (result.isValid()) {Navigator.switchScene("login.fxml");}
     }
 }

@@ -154,3 +154,8 @@ Navigator.switchScene("dashboard.fxml");
 2. parse thành UI
 3. tạo Scene
 4. set vào Stage
+
+
+
+
+

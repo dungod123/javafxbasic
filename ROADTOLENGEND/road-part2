@@ -1,0 +1,32 @@
+1. Async JavaFX
+2. Dialogs
+3. CSS
+4. Chat app
+5. Auction system
+6. REST API backend
+
+PHASE 1 — Desktop Architecture
+✅ JavaFX
+✅ CRUD
+✅ Auth
+✅ Layering Architecture
+
+PHASE 2 — Advanced JavaFX
+Property binding
+Async Task
+Dialog
+CSS
+Custom component
+
+PHASE 3 — Networking
+Build:chat app
+server/client
+socket
+threading
+packet
+broadcast
+PHASE 4 — Backend mindset
+REST API
+Spring Boot
+JWT
+connection pool
