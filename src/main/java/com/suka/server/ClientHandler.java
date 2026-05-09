@@ -11,6 +11,8 @@ public class ClientHandler implements Runnable{
     private BufferedReader in;
     private PrintWriter out;
 
+    private String username;
+
     public ClientHandler(Socket socket){
         this.socket =socket;
 
@@ -31,17 +33,34 @@ public class ClientHandler implements Runnable{
     public void run() {
 
         try {
-            String message;
 
+            //khi tham gia phong chat:
+            username = in.readLine();
+            broadcast("[SYSTEM] "+ username +" joined the chat");
+
+
+            String message;
             while ((message = in.readLine())!= null){
 
-                System.out.println(message);
+                //System.out.println(message);
 
-                broadcast(message);
+                broadcast("["+username+"] "+message);
 
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+
+        finally {
+            try{
+
+                socket.close();
+            }
+            catch (Exception e){
+                e.printStackTrace();
+            }
+            chatServer.clients.remove(this);
+            broadcast("[SYSTEM] "+ username +"left the chat");
         }
     }
 

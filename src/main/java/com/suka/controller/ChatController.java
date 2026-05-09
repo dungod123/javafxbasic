@@ -30,7 +30,7 @@ public class ChatController {
         usernameLabel.setText(Session.getCurrentUser().getUsername());
 
         try {
-            socketClient = new SocketClient();
+            socketClient = new SocketClient(Session.getCurrentUser().getUsername());
         } catch (IllegalStateException e) {
             messageListView.getItems().add("Cannot connect to chat server. Start server on port 9999.");
             return;
@@ -79,9 +79,7 @@ public class ChatController {
 
 //        messageListView.getItems().add("[" + Session.getCurrentUser().getUsername()+"] "+ message);->FAKE MESSAGE
 
-        String fullMessage = "["+Session.getCurrentUser().getUsername()+"] "+message;
-
-        socketClient.sendMessage(fullMessage);
+        socketClient.sendMessage(message);
 
         messageField.clear();
 

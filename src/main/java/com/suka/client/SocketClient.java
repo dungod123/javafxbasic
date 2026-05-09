@@ -15,7 +15,7 @@ public class SocketClient {
 
     private PrintWriter out;
 
-    public SocketClient(){
+    public SocketClient(String username){
         try{
             socket = new Socket(HOST , PORT);
 
@@ -29,6 +29,7 @@ public class SocketClient {
                     e
             );
         }
+        out.println(username);
     }
 
     public void sendMessage(String message){
