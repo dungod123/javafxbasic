@@ -42,4 +42,9 @@ public class dashboardController {
         Navigator.switchScene("manage-users.fxml");
 
     }
+
+    @FXML
+    public void goToChat(){
+        Navigator.switchScene("chat.fxml");
+    }
 }

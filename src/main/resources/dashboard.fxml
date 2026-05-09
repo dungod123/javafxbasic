@@ -9,5 +9,6 @@
     <Label fx:id="welcomeLabel" alignment="CENTER" layoutX="-7.0" layoutY="7.0" prefHeight="40.0" prefWidth="300.0" style="-fx-background-color: #1234;" text="DASHBOARD" />
    <Button fx:id="settingButton" alignment="CENTER" layoutX="432.0" layoutY="14.0" mnemonicParsing="false" onAction="#goToSetting" prefHeight="26.0" prefWidth="89.0" text="setting" textAlignment="JUSTIFY" />
    <Button fx:id="manager" layoutX="321.0" layoutY="14.0" mnemonicParsing="false" onAction="#goToManageUser" prefHeight="26.0" prefWidth="89.0" text="Manager" />
+   <Button layoutX="455.0" layoutY="360.0" mnemonicParsing="false" onAction="#goToChat" prefHeight="26.0" prefWidth="89.0" text="Chat room" />
 
 </AnchorPane>
