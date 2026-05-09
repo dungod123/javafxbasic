@@ -11,6 +11,11 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 
+/**
+ * JavaFX controller for the chat room screen.
+ * It connects the UI to the socket-based chat client and keeps the
+ * message list plus online-user list in sync with server updates.
+ */
 public class ChatController {
     @FXML
     public Label usernameLabel;
@@ -22,6 +27,9 @@ public class ChatController {
     public TextField messageField;
 
     @FXML
+    private TextField recipientField;
+
+    @FXML
     private ListView<String> onlineUsersListView;
 
     private SocketClient socketClient;
@@ -29,6 +37,10 @@ public class ChatController {
 
 
     @FXML
+    /**
+     * Initializes the chat view, displays the current username, connects to the
+     * chat server, and starts listening for server updates.
+     */
     public void initialize(){
         usernameLabel.setText(Session.getCurrentUser().getUsername());
 
@@ -43,6 +55,10 @@ public class ChatController {
 
     }
 
+    /**
+     * Starts a background listener that reads server messages and marshals UI
+     * updates back onto the JavaFX application thread.
+     */
     private void startMessageListener() {
         Task<Void> task = new Task<>() {
 
@@ -57,7 +73,7 @@ public class ChatController {
                     Platform.runLater(() -> {
 
                         if (finalMessage.startsWith("USERS:")){
-                            String users = finalMessage.substring(6); //-> listuser (String)
+                            String users = finalMessage.substring(6);
 
                             String[] usernames = users.split(",");
 
@@ -68,7 +84,7 @@ public class ChatController {
                                     onlineUsersListView.getItems().add(username);
                                 }
                             }
-                            return; //neu khong thi Chatroom se cho ca: USERS:dungod123,... vao messageListView
+                            return;
                         }
                         messageListView.getItems().add(finalMessage);
 
@@ -84,6 +100,11 @@ public class ChatController {
     }
 
     @FXML
+    /**
+     * Sends the current text field content to the chat server.
+     *
+     * @param actionEvent button action event from JavaFX
+     */
     public void handleSend(ActionEvent actionEvent) {
         if (socketClient == null) {
             messageListView.getItems().add("Chat server is unavailable.");
@@ -94,15 +115,24 @@ public class ChatController {
 
         if (message.isBlank()) return;
 
-//        messageListView.getItems().add("[" + Session.getCurrentUser().getUsername()+"] "+ message);->FAKE MESSAGE
+        String recipient = recipientField.getText();
 
-        socketClient.sendMessage(message);
-
+        if (recipient.isBlank()){
+            socketClient.sendMessage("CHAT:"+message);
+        }
+        else{
+            socketClient.sendMessage("DM:"+recipient+":"+message);
+        }
         messageField.clear();
 
     }
 
     @FXML
+    /**
+     * Leaves the chat room and returns the user to the dashboard screen.
+     *
+     * @param actionEvent button action event from JavaFX
+     */
     public void handleBackDashboard(ActionEvent actionEvent) {
         if (socketClient != null) {
             socketClient.leaveChatRoom();

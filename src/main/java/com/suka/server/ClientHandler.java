@@ -6,7 +6,9 @@ import java.net.Socket;
 import static com.suka.server.chatServer.clients;
 
 /**
- *  CLASS NAY: SERVER SENT PACKAGE (GOI DU LIEU) -> CLIENT UPDATE STATE + UI
+ * Handles a single connected chat client on the server side.
+ * The handler reads inbound messages from one socket and broadcasts
+ * updates to all connected clients.
  */
 public class ClientHandler implements Runnable{
 
@@ -17,13 +19,16 @@ public class ClientHandler implements Runnable{
     private String username;
     private boolean left;
 
+    /**
+     * Creates a handler for one accepted client socket.
+     *
+     * @param socket connected client socket
+     */
     public ClientHandler(Socket socket){
         this.socket =socket;
 
         try{
-            //luong doc
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            //luong ghi
             out = new PrintWriter(socket.getOutputStream(), true);
 
         } catch (Exception e) {
@@ -34,11 +39,14 @@ public class ClientHandler implements Runnable{
 
 
     @Override
+    /**
+     * Reads the username first, then continuously reads chat messages until the
+     * client disconnects or sends the leave command.
+     */
     public void run() {
 
         try {
 
-            //khi tham gia phong chat:
             username = in.readLine();
             broadcast("[SYSTEM] "+ username +" joined the chat");
             broadcastUsers();
@@ -50,7 +58,19 @@ public class ClientHandler implements Runnable{
                     break;
                 }
 
-                broadcast("["+username+"] "+message);
+                if (message.startsWith("CHAT:")){
+                    String content = message.substring(5);
+                    broadcast("["+username+"] "+content);
+                }
+
+                else if (message.startsWith("DM:")){
+                    String[] parts = message.split(":",3);
+
+                    String recipient = parts[1];
+                    String content = parts[2];
+
+                    sendPrivateMessage(recipient, content);
+                }
 
             }
         } catch (Exception e) {
@@ -70,6 +90,18 @@ public class ClientHandler implements Runnable{
         }
     }
 
+    private void sendPrivateMessage(String recipient, String content) {
+        for (ClientHandler client:clients){
+            if (client.username.equals(recipient)){
+                client.out.println("[DM FROM "+ username +"] "+content);
+            }
+        }
+    }
+
+    /**
+     * Removes this client from the active client set and notifies the remaining
+     * users that the client has left.
+     */
     public void leaveChatRoom(){
         if (left) {
             return;
@@ -82,25 +114,26 @@ public class ClientHandler implements Runnable{
     }
 
 
+    /**
+     * Sends a chat message to every currently connected client.
+     *
+     * @param message formatted message to broadcast
+     */
     public void broadcast(String message){
-        /**
-         * Gui package tin nhan de cap nhap vao chatbox: messageListView
-         */
         for (ClientHandler client : chatServer.clients){
             client.out.println(message);
         }
     }
 
+    /**
+     * Broadcasts the current online user list using the {@code USERS:} protocol
+     * understood by the chat client UI.
+     */
     public void broadcastUsers(){
-        /**
-         * GUI PACKAGE cho client :"USERS:dungod123,arisuka,bobby789" ->list nhung nguoi online
-         * de cap nhap onlineUsersListView
-         */
-
         StringBuilder users = new StringBuilder("USERS:");
 
         for (ClientHandler client : chatServer.clients){
-            users.append(client.username).append(","); //cap nhap nhung nguoi dang Online
+            users.append(client.username).append(",");
         }
 
         String userList = users.toString();

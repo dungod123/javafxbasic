@@ -6,11 +6,23 @@ import java.net.Socket;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Starts the chat server and accepts client connections on port 9999.
+ * Each accepted socket is wrapped in a {@link ClientHandler} and processed
+ * on a dedicated thread.
+ */
 public class chatServer {
 
-    //All client: list nhung client tham gia chat room
+    /**
+     * Connected clients that currently participate in the chat room.
+     */
     public static Set<ClientHandler> clients = new HashSet<>();
 
+    /**
+     * Boots the chat server and keeps accepting new clients until the process stops.
+     *
+     * @param args not used
+     */
     public static void main(String[] args) {
         try{
             ServerSocket serverSocket = new ServerSocket(9999);
@@ -24,7 +36,7 @@ public class chatServer {
 
                 ClientHandler clientHandler = new ClientHandler(socket);
 
-                clients.add(clientHandler);   //for broadcast
+                clients.add(clientHandler);
 
                 Thread thread = new Thread((Runnable) clientHandler);
 
