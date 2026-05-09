@@ -1,6 +1,7 @@
 package com.suka.client;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
@@ -44,5 +45,32 @@ public class SocketClient {
             throw new IllegalStateException("Socket input stream is not initialized.");
         }
         return in;
+    }
+
+    public void leaveChatRoom() {
+        if (out != null) {
+            out.println("/leave");
+        }
+        close();
+    }
+
+    public void close() {
+        try {
+            if (in != null) {
+                in.close();
+            }
+        } catch (IOException ignored) {
+        }
+
+        if (out != null) {
+            out.close();
+        }
+
+        try {
+            if (socket != null && !socket.isClosed()) {
+                socket.close();
+            }
+        } catch (IOException ignored) {
+        }
     }
 }

@@ -21,6 +21,9 @@ public class ChatController {
     @FXML
     public TextField messageField;
 
+    @FXML
+    private ListView<String> onlineUsersListView;
+
     private SocketClient socketClient;
 
 
@@ -53,7 +56,21 @@ public class ChatController {
 
                     Platform.runLater(() -> {
 
-                        messageListView.getItems().add(finalMessage); //add vao bang chat (listview)
+                        if (finalMessage.startsWith("USERS:")){
+                            String users = finalMessage.substring(6); //-> listuser (String)
+
+                            String[] usernames = users.split(",");
+
+                            onlineUsersListView.getItems().clear();
+
+                            for (String username : usernames){
+                                if (!username.isBlank()){
+                                    onlineUsersListView.getItems().add(username);
+                                }
+                            }
+                            return; //neu khong thi Chatroom se cho ca: USERS:dungod123,... vao messageListView
+                        }
+                        messageListView.getItems().add(finalMessage);
 
                     });
                 }
@@ -87,6 +104,11 @@ public class ChatController {
 
     @FXML
     public void handleBackDashboard(ActionEvent actionEvent) {
+        if (socketClient != null) {
+            socketClient.leaveChatRoom();
+            socketClient = null;
+        }
+
         Navigator.switchScene("dashboard.fxml");
     }
 

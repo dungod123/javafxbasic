@@ -8,7 +8,7 @@ import java.util.Set;
 
 public class chatServer {
 
-    //All client
+    //All client: list nhung client tham gia chat room
     public static Set<ClientHandler> clients = new HashSet<>();
 
     public static void main(String[] args) {

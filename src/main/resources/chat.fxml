@@ -6,7 +6,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="500" prefWidth="600" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.suka.controller.ChatController">
+<AnchorPane prefHeight="500" prefWidth="772.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.suka.controller.ChatController">
 
     <!-- title -->
 
@@ -31,5 +31,7 @@
     <!-- logout -->
 
     <Button layoutX="435.0" layoutY="466.0" onAction="#handleBackDashboard" prefHeight="26.0" prefWidth="148.0" text="Back to dashboard" />
+   <ListView fx:id="onlineUsersListView" layoutX="603.0" layoutY="60.0" prefHeight="340.0" prefWidth="155.0" />
+   <Label alignment="CENTER" layoutX="623.0" layoutY="38.0" prefHeight="18.0" prefWidth="86.0" text="Online:" textFill="#2dcd18" />
 
 </AnchorPane>
