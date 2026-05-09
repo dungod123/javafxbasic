@@ -2,6 +2,7 @@
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
@@ -34,4 +35,5 @@
          <Font size="27.0" />
       </font>
    </Label>
+   <ProgressIndicator fx:id="loadingSpinner" layoutX="410.0" layoutY="230.0" prefHeight="100.0" prefWidth="86.0" progress="0.0" visible="false" />
 </AnchorPane>

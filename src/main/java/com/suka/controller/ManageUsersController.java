@@ -9,10 +9,7 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
@@ -44,6 +41,9 @@ public class ManageUsersController {
 
     @FXML
     private Label loadingLabel;
+
+    @FXML
+    private ProgressIndicator loadingSpinner;
 
     private UserRepository userRepository = new UserRepository();
 
@@ -90,15 +90,26 @@ public class ManageUsersController {
          * Vì vậy ta đưa phần load user sang Task và chạy ở thread khác.
          */
         loadingLabel.setVisible(true);
+        loadingSpinner.setVisible(true);
         Task<ObservableList<User>> loadUsersTask =new Task<ObservableList<User>>() {
             @Override
             protected ObservableList<User> call() throws Exception {
 
-                Thread.sleep(2000);
+                for (int i=0;i<=10;i++){
+                    Thread.sleep(200);
+                    updateProgress(i,10); // i/10 -> i=2 progress =20%;
+                    updateMessage("Loading "+ (i*100/10) +"%");
+                }
                 return  FXCollections.observableArrayList(userRepository.getAllUsers());
             }
         };
 
+        //Property Binding:  bind(Observable value) = sync voi nhau -> REALTIME UPDATE
+        //NOT : spinner.setProgress(task.getProgress()
+        loadingSpinner.progressProperty().bind(loadUsersTask.progressProperty());
+        loadingLabel.textProperty().bind(loadUsersTask.messageProperty());
+
+        //sau khi load xong:
         loadUsersTask.setOnSucceeded(event ->{
             /**
              * Không gán users = loadUsersTask.getValue()
@@ -112,6 +123,7 @@ public class ManageUsersController {
              */
             users.setAll(loadUsersTask.getValue());
             loadingLabel.setVisible(false);
+            loadingSpinner.setVisible(false);
         });
         loadUsersTask.setOnFailed(event -> {
             loadingLabel.setVisible(false);
