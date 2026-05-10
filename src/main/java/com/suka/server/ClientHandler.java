@@ -26,6 +26,8 @@ public class ClientHandler implements Runnable{
     private boolean left;
     private Gson gson = new Gson();
     private MessageRepository messageRepository = new MessageRepository();
+    private String currentRoom ="General";
+
 
     /**
      * Creates a handler for one accepted client socket.
@@ -96,7 +98,7 @@ public class ClientHandler implements Runnable{
         switch (packet.getType()){
             case "CHAT":
                 chatSaveMessage(packet);
-                broadcastChat(packet);
+                broadcastChatRoom(packet);
                 break;
             case "DM":
                 DMSaveMessage(packet);
@@ -107,7 +109,16 @@ public class ClientHandler implements Runnable{
                 break;
             case "TYPING":
                 broadcastTyping(packet);
+                break;
+            case "JOIN_ROOM":
+                handleJoinRoom(packet);
+                break;
         }
+    }
+
+    private void handleJoinRoom(Packet packet) {
+        currentRoom = packet.getRoom();
+        System.out.println(username +" joined "+currentRoom);
     }
 
     private void broadcastTyping(Packet packet) {
@@ -119,13 +130,24 @@ public class ClientHandler implements Runnable{
         }
     }
 
+    private void broadcastChatRoom(Packet packet){
+        packet.setTimestamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
+        for (ClientHandler client : clients){
+            if (client.currentRoom != null && client.currentRoom.equals(packet.getRoom())){
+                client.out.println(gson.toJson(packet));
+            }
+        }
+    }
+
     private void chatSaveMessage(Packet packet) {
-        Message message = new Message(packet.getSender(),null, "CHAT", packet.getMessage());
+        Message message = new Message(packet.getSender(),null, "CHAT", packet.getMessage() );
+        message.setRoom(currentRoom);
         messageRepository.saveMessage(message);
     }
 
     private void DMSaveMessage(Packet packet){
         Message message = new Message(packet.getSender(),packet.getRecipient(),"DM", packet.getMessage());
+        message.setRoom(currentRoom);
         messageRepository.saveMessage(message);
     }
 

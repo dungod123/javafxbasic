@@ -12,7 +12,7 @@ import java.util.List;
 
 public class MessageRepository {
     public void saveMessage(Message message){
-        String sql = "INSERT INTO messages (sender,recipient,type,content) VALUES (?,?,?,?)";
+        String sql = "INSERT INTO messages (sender,recipient,type,content,room) VALUES (?,?,?,?,?)";
         try(
                 Connection conn = DatabaseConnection.connect();
                 PreparedStatement stmt = conn.prepareStatement(sql);
@@ -22,6 +22,7 @@ public class MessageRepository {
             stmt.setString(2,message.getRecipient());
             stmt.setString(3,message.getType());
             stmt.setString(4,message.getContent());
+            stmt.setString(5,message.getRoom());
             stmt.executeUpdate();
         }
         catch (SQLException e) {
@@ -29,26 +30,28 @@ public class MessageRepository {
         }
     }
 
-    public List<Message> getRecentMessages(){
+    public List<Message> getRecentRoomMessages(String room){
         List<Message> messages = new ArrayList<>();
-        String sql = "SELECT * FROM messages ORDER BY created_at DESC LIMIT 50";
+        String sql = "SELECT * FROM messages WHERE room = ? ORDER BY created_at DESC LIMIT 50";
 
         try(
                 Connection conn = DatabaseConnection.connect();
 
                 PreparedStatement stmt = conn.prepareStatement(sql);
 
-                ResultSet rs = stmt.executeQuery();
                 ){
+
+            stmt.setString(1,room);
+            ResultSet rs = stmt.executeQuery();
             while (rs.next()){
                 Message message = new Message();
                 message.setId(rs.getInt("id"));
                 message.setSender(rs.getString("sender"));
                 message.setRecipient(rs.getString("recipient"));
-                message.setRecipient(rs.getString("recipient"));
                 message.setType(rs.getString("type"));
                 message.setContent(rs.getString("content"));
                 message.setCreateAt(rs.getTimestamp("created_at"));
+                message.setRoom(rs.getString("room"));
                 messages.add(message);
             }
         }
@@ -77,6 +80,7 @@ public class MessageRepository {
                 message.setRecipient(rs.getString("recipient"));
                 message.setType(rs.getString("type"));
                 message.setContent(rs.getString("content"));
+                message.setRoom(rs.getString("room"));
                 messages.add(message);
             }
         }

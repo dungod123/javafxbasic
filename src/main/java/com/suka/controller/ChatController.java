@@ -42,6 +42,12 @@ public class ChatController {
     public TextField messageField;
 
     @FXML
+    public ListView<String> roomListView;
+
+    @FXML
+    public Label currentRoomLabel;
+
+    @FXML
     private TextField recipientField;
 
     @FXML
@@ -61,6 +67,7 @@ public class ChatController {
 
 
 
+
     @FXML
     private TextField searchField;
 
@@ -73,6 +80,8 @@ public class ChatController {
 
 
 
+
+
     @FXML
     /**
      * Initializes the chat view, displays the current username, connects to the
@@ -82,7 +91,6 @@ public class ChatController {
         usernameLabel.setText(Session.getCurrentUser().getUsername());
 
         try {
-            loadRecentMessages();
             socketClient = new SocketClient(Session.getCurrentUser().getUsername());
         } catch (IllegalStateException e) {
             messageListView.getItems().add("Cannot connect to chat server. Start server on port 9999.");
@@ -114,7 +122,6 @@ public class ChatController {
         // Từ nay, bạn chỉ cần thêm tin nhắn vào 'allMessages', giao diện sẽ tự cập nhật
 
         messageListView.setItems(filteredMessages);
-        loadRecentMessages();
 
 
         //dungod123 is typing ...
@@ -126,9 +133,31 @@ public class ChatController {
         );
 
 
+        roomListView.getItems().addAll("General" , "Anime" ,"Gaming");
+        roomListView.getSelectionModel().select("General");
+
+        roomListView.getSelectionModel().selectedItemProperty().addListener(
+                (obs,oldRoom,newRoom) ->{
+                    if (newRoom != null){
+                        joinRoom(newRoom);
+                    }
+                }
+        );
 
         startMessageListener();
 
+    }
+
+
+    private void joinRoom(String room) {
+        currentRoomLabel.setText("ROOM: " + room);
+        loadRecentRoomMessages();
+
+        Packet packet = new Packet();
+        packet.setType("JOIN_ROOM");
+        packet.setRoom(room);
+        packet.setSender(Session.getCurrentUser().getUsername());
+        socketClient.sendPacket(packet);
     }
 
     private void sendTypingEvent() {
@@ -139,9 +168,22 @@ public class ChatController {
         socketClient.sendPacket(packet);
     }
 
-    private void loadRecentMessages() {
+//    private void loadRecentMessages() {
+//        allMessages.clear();
+//        List<Message> messages = messageRepository.getRecentMessages();
+//        Collections.reverse(messages);
+//
+//        for (Message message : messages){
+//            String display = formatMessage(message);
+//            if (!display.isEmpty()){
+//                allMessages.add(display);
+//            }
+//        }
+//    }
+    private void loadRecentRoomMessages() {
+        String room = currentRoomLabel.getText().replace("ROOM: ","");
         allMessages.clear();
-        List<Message> messages = messageRepository.getRecentMessages();
+        List<Message> messages = messageRepository.getRecentRoomMessages(room);
         Collections.reverse(messages);
 
         for (Message message : messages){
@@ -153,6 +195,7 @@ public class ChatController {
     }
 
     public String formatMessage(Message message){
+        if (message.getCreatedAt() == null) return "";
         String time = message.getCreatedAt().toLocalDateTime().format(formatter);
         String display = "["+time+"]";
         if ("DM".equals(message.getType())){
@@ -280,6 +323,7 @@ public class ChatController {
         if (message.isBlank()) return;
         if (recipient.isBlank()){
             packet = new Packet("CHAT", Session.getCurrentUser().getUsername(), null, message); //GUI DEN TOAN SERVER
+            packet.setRoom(currentRoomLabel.getText().replace("ROOM: ",""));
         }
         else{
             packet = new Packet("DM", Session.getCurrentUser().getUsername(),recipient,message); //GUI TIN RIENG
@@ -323,7 +367,7 @@ public class ChatController {
     public void handleSearch(){
         String keyword = searchField.getText();
         if (keyword.isBlank()){
-            loadRecentMessages();
+            loadRecentRoomMessages();
             return;
         }
         else {

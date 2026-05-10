@@ -6,7 +6,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="500" prefWidth="772.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.suka.controller.ChatController">
+<AnchorPane prefHeight="686.0" prefWidth="859.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.suka.controller.ChatController">
 
     <!-- title -->
 
@@ -18,24 +18,27 @@
 
     <!-- message list -->
 
-    <ListView fx:id="messageListView" layoutX="20" layoutY="60" prefHeight="340" prefWidth="560" />
+    <ListView fx:id="messageListView" layoutX="20" layoutY="60" prefHeight="396.0" prefWidth="560" />
 
     <!-- input -->
 
-    <TextField fx:id="messageField" layoutX="20" layoutY="430" prefWidth="450" promptText="Type message..." />
+    <TextField fx:id="messageField" layoutX="23.0" layoutY="531.0" prefWidth="450" promptText="Type message..." />
 
     <!-- send -->
 
-    <Button layoutX="490" layoutY="430" onAction="#handleSend" prefWidth="90" text="Send" />
+    <Button layoutX="486.0" layoutY="531.0" onAction="#handleSend" prefWidth="90" text="Send" />
 
     <!-- logout -->
 
-    <Button layoutX="435.0" layoutY="466.0" onAction="#handleBackDashboard" prefHeight="26.0" prefWidth="148.0" text="Back to dashboard" />
-   <ListView fx:id="onlineUsersListView" layoutX="603.0" layoutY="60.0" prefHeight="340.0" prefWidth="155.0" />
+    <Button layoutX="383.0" layoutY="576.0" onAction="#handleBackDashboard" prefHeight="26.0" prefWidth="148.0" text="Back to dashboard" />
+   <ListView fx:id="onlineUsersListView" layoutX="603.0" layoutY="60.0" prefHeight="330.0" prefWidth="155.0" />
    <Label alignment="CENTER" layoutX="623.0" layoutY="38.0" prefHeight="18.0" prefWidth="86.0" text="Online:" textFill="#2dcd18" />
    <TextField fx:id="recipientField" layoutX="138.0" layoutY="25.0" promptText="recipient" />
-   <TextField fx:id="searchField" layoutX="600.0" layoutY="430.0" promptText="search message" />
-   <Button layoutX="636.0" layoutY="466.0" mnemonicParsing="false" onAction="#handleSearch" prefHeight="18.0" prefWidth="86.0" text="search" />
-   <Label fx:id="typingLabel" layoutX="20.0" layoutY="400.0" prefHeight="18.0" prefWidth="219.0" style="-fx-background-color: #1234;" />
+   <TextField fx:id="searchField" layoutX="268.0" layoutY="461.0" promptText="search message" />
+   <Button layoutX="443.0" layoutY="461.0" mnemonicParsing="false" onAction="#handleSearch" prefHeight="18.0" prefWidth="86.0" text="search" />
+   <Label fx:id="typingLabel" layoutX="20.0" layoutY="438.0" prefHeight="18.0" prefWidth="219.0" style="-fx-alignment: #1234;" />
+   <ListView fx:id="roomListView" layoutX="600.0" layoutY="412.0" prefHeight="145.0" prefWidth="155.0" />
+   <Label layoutX="655.0" layoutY="391.0" prefHeight="18.0" prefWidth="53.0" text="ROOM" textFill="#191de4" />
+   <Label fx:id="currentRoomLabel" layoutX="624.0" layoutY="557.0" prefHeight="26.0" prefWidth="107.0" style="-fx-background-color: #9212;" text="Current Room" />
 
 </AnchorPane>

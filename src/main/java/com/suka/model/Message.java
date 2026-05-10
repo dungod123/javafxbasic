@@ -6,6 +6,7 @@ public class Message {
     private int id;
     private String sender,recipient,type,content;
     private Timestamp createAt;
+    private String room;
 
     public Message(
             String sender,
@@ -70,5 +71,17 @@ public class Message {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public Timestamp getCreateAt() {
+        return createAt;
+    }
+
+    public String getRoom() {
+        return room;
+    }
+
+    public void setRoom(String room) {
+        this.room = room;
     }
 }
