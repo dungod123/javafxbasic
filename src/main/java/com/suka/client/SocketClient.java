@@ -1,10 +1,14 @@
 package com.suka.client;
 
+import com.suka.model.Packet;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import com.google.gson.Gson;
+
 
 /**
  * Lightweight TCP chat client used by the JavaFX chat screen.
@@ -20,6 +24,8 @@ public class SocketClient {
     private BufferedReader in;
 
     private PrintWriter out;
+
+    private Gson gson = new Gson();
 
     /**
      * Opens a socket connection to the chat server and immediately sends the username
@@ -44,18 +50,11 @@ public class SocketClient {
         out.println(username);
     }
 
-    /**
-     * Sends one chat message to the server.
-     *
-     * @param message raw message body entered by the user
-     */
-    public void sendMessage(String message){
-        if (out == null) {
-            throw new IllegalStateException("Socket output stream is not initialized.");
-        }
-        out.println(message);
-    }
 
+    public void sendPacket(Packet packet){
+        String json = gson.toJson(packet);
+        out.println(json); // client send Json to Server
+    }
     /**
      * Returns the buffered reader used by the UI thread to receive server messages.
      *
@@ -72,9 +71,8 @@ public class SocketClient {
      * Requests to leave the chat room and then closes local socket resources.
      */
     public void leaveChatRoom() {
-        if (out != null) {
-            out.println("/leave");
-        }
+        Packet packet = new Packet("LEAVE","SYSTEM",null,null);
+        sendPacket(packet);
         close();
     }
 
@@ -83,21 +81,16 @@ public class SocketClient {
      */
     public void close() {
         try {
-            if (in != null) {
-                in.close();
-            }
-        } catch (IOException ignored) {
-        }
-
-        if (out != null) {
-            out.close();
-        }
-
-        try {
+            // Đóng socket trước để unblock reader.readLine() ở luồng khác
             if (socket != null && !socket.isClosed()) {
                 socket.close();
             }
-        } catch (IOException ignored) {
-        }
+        } catch (IOException ignored) {}
+
+        try {
+            if (in != null) in.close();
+        } catch (IOException ignored) {}
+
+        if (out != null) out.close();
     }
 }

@@ -1,0 +1,9 @@
+CHAT = normal public message
+•
+DM = private message
+•
+SYSTEM = joined/left/errors
+•
+USERS = online users list
+•
+LEAVE = user disconnects

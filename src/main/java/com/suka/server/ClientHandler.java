@@ -2,6 +2,8 @@ package com.suka.server;
 
 import java.io.*;
 import java.net.Socket;
+import com.google.gson.Gson;
+import com.suka.model.Packet;
 
 import static com.suka.server.chatServer.clients;
 
@@ -15,9 +17,9 @@ public class ClientHandler implements Runnable{
     private Socket socket;
     private BufferedReader in;
     private PrintWriter out;
-
     private String username;
     private boolean left;
+    private Gson gson = new Gson();
 
     /**
      * Creates a handler for one accepted client socket.
@@ -48,29 +50,19 @@ public class ClientHandler implements Runnable{
         try {
 
             username = in.readLine();
-            broadcast("[SYSTEM] "+ username +" joined the chat");
+            broadcast(new Packet("SYSTEM","SYSTEM",null,username+" JOINED THE CHAT"));
             broadcastUsers();
 
 
-            String message;
-            while ((message = in.readLine())!= null){
-                if ("/leave".equals(message)) {
-                    break;
-                }
+            //String message;
+            String json;
+            while ((json = in.readLine())!= null){
+                /**
+                 * fromJson : String json-> javaObject json
+                 */
+                Packet packet = gson.fromJson(json, Packet.class);
+                handlePacket(packet);
 
-                if (message.startsWith("CHAT:")){
-                    String content = message.substring(5);
-                    broadcast("["+username+"] "+content);
-                }
-
-                else if (message.startsWith("DM:")){
-                    String[] parts = message.split(":",3);
-
-                    String recipient = parts[1];
-                    String content = parts[2];
-
-                    sendPrivateMessage(recipient, content);
-                }
 
             }
         } catch (Exception e) {
@@ -90,26 +82,51 @@ public class ClientHandler implements Runnable{
         }
     }
 
-    private void sendPrivateMessage(String recipient, String content) {
+    /**
+     * Server handlePacket
+     * @param packet
+     */
+    private void handlePacket(Packet packet) {
+        switch (packet.getType()){
+            case "CHAT":
+                broadcastChat(packet);
+                break;
+            case "DM":
+                sendPrivateMessage(packet);
+                break;
+            case "LEAVE":
+                leaveChatRoom();
+                break;
+        }
+    }
+
+    private void broadcastChat(Packet packet) {
+        packet = new Packet("CHAT",packet.getSender(),
+                null,packet.getMessage());
+        broadcast(packet);
+    }
+
+    private void sendPrivateMessage(Packet packet) {
+        packet = new Packet("DM",packet.getSender(),
+                packet.getRecipient(), packet.getMessage());
+        String json = gson.toJson(packet);
         for (ClientHandler client:clients){
-            if (client.username.equals(recipient)){
-                client.out.println("[DM FROM "+ username +"] "+content);
+            if (client.username.equals(packet.getRecipient())){
+                client.out.println(json);
+                break;
             }
         }
     }
 
-    /**
-     * Removes this client from the active client set and notifies the remaining
-     * users that the client has left.
-     */
     public void leaveChatRoom(){
-        if (left) {
-            return;
-        }
+        if (left) {return;}
         left = true;
 
         chatServer.clients.remove(this);
-        broadcast("[SYSTEM] "+ username +" left the chat");
+        Packet packet = new Packet("LEAVE","SYSTEM",
+                null,username+" LEFT THE CHAT");
+        String json = gson.toJson(packet);
+        broadcast(packet);
         broadcastUsers();
     }
 
@@ -117,29 +134,32 @@ public class ClientHandler implements Runnable{
     /**
      * Sends a chat message to every currently connected client.
      *
-     * @param message formatted message to broadcast
+     *
      */
-    public void broadcast(String message){
+    public void broadcast(Packet packet){
+        String json = gson.toJson(packet);
         for (ClientHandler client : chatServer.clients){
-            client.out.println(message);
+            client.out.println(json);
         }
     }
 
-    /**
-     * Broadcasts the current online user list using the {@code USERS:} protocol
-     * understood by the chat client UI.
-     */
-    public void broadcastUsers(){
-        StringBuilder users = new StringBuilder("USERS:");
 
+    public void broadcastUsers(){
+
+        /**
+         * create a message "alice,bob,charles"
+         */
+        StringBuilder users =new StringBuilder();
         for (ClientHandler client : chatServer.clients){
             users.append(client.username).append(",");
         }
-
-        String userList = users.toString();
-
+        /**
+         * send Object json to client
+         */
+        Packet packet = new Packet("USERS", "SYSTEM", null, users.toString());
+        String json = gson.toJson(packet);
         for (ClientHandler client : chatServer.clients){
-            client.out.println(userList);
+            client.out.println(json);
         }
 
     }
