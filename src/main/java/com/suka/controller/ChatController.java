@@ -6,7 +6,11 @@ import com.suka.model.Packet;
 import com.suka.repository.MessageRepository;
 import com.suka.session.Session;
 import com.suka.util.Navigator;
+import javafx.animation.PauseTransition;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -14,13 +18,13 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import com.google.gson.Gson;
+import javafx.util.Duration;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+
 
 /**
  * JavaFX controller for the chat room screen.
@@ -55,8 +59,17 @@ public class ChatController {
 
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 
+
+
     @FXML
     private TextField searchField;
+
+    private ObservableList<String> allMessages = FXCollections.observableArrayList();
+    private FilteredList<String> filteredMessages;
+
+    @FXML
+    private Label typingLabel;
+    private Set<String> typingUsers = new HashSet<>();
 
 
 
@@ -76,32 +89,81 @@ public class ChatController {
             return;
         }
 
+        // 2. Thiết lập cơ chế lọc Real-time
+        // Tạo FilteredList bọc quanh danh sách gốc, mặc định cho hiện tất cả (s -> true)
+
+        filteredMessages = new FilteredList<>(allMessages);
+
+        searchField.textProperty().addListener(
+                (observable,oldValue,newValue)->{
+                    filteredMessages.setPredicate(message -> {
+                        if (newValue == null || newValue.isBlank()) {
+                            return true;
+                        }
+                        String lowerCaseFilter = newValue.toLowerCase();
+
+                        return message.toLowerCase().contains(lowerCaseFilter);
+                            }
+
+                    );
+
+                }
+        );
+
+        // 4. Kết nối danh sách đã lọc với ListView trên giao diện
+        // Từ nay, bạn chỉ cần thêm tin nhắn vào 'allMessages', giao diện sẽ tự cập nhật
+
+        messageListView.setItems(filteredMessages);
+        loadRecentMessages();
+
+
+        //dungod123 is typing ...
+        //property java la reactive UI -> realtime
+        messageField.textProperty().addListener(
+                (observable,oldValue,newValue)->{
+                    sendTypingEvent();
+                }
+        );
+
+
+
         startMessageListener();
 
     }
 
+    private void sendTypingEvent() {
+        Packet packet = new Packet();
+        packet.setType("TYPING");
+        packet.setSender(Session.getCurrentUser().getUsername());
+
+        socketClient.sendPacket(packet);
+    }
+
     private void loadRecentMessages() {
-        messageListView
-                .getItems()
-                .clear();
+        allMessages.clear();
         List<Message> messages = messageRepository.getRecentMessages();
         Collections.reverse(messages);
+
         for (Message message : messages){
-            String time = message.getCreatedAt().toLocalDateTime().format(formatter);
-            String display = "["+time+"]";
-            if ("DM".equals(message.getType())){
-                display +="[DM FROM "+message.getSender()+"] "+message.getContent();
-            }
-            else if ("CHAT".equals(message.getType())){
-                display +="[" + message.getSender() +"] "+message.getContent();
-            }
-            
-            if (!display.isEmpty()) {
-                messageListView.getItems().add(display);
+            String display = formatMessage(message);
+            if (!display.isEmpty()){
+                allMessages.add(display);
             }
         }
     }
 
+    public String formatMessage(Message message){
+        String time = message.getCreatedAt().toLocalDateTime().format(formatter);
+        String display = "["+time+"]";
+        if ("DM".equals(message.getType())){
+            display +="[DM FROM "+message.getSender()+"] "+message.getContent();
+        }
+        else if ("CHAT".equals(message.getType())){
+            display +="[" + message.getSender() +"] "+message.getContent();
+        }
+
+        return display;
+    }
     /**
      * Starts a background listener that reads server messages and marshals UI
      * updates back onto the JavaFX application thread.
@@ -139,19 +201,54 @@ public class ChatController {
      * @param packet
      */
     private void handlePacket(Packet packet) {
+        String display = "";
         switch (packet.getType()){
             case "CHAT":
-                messageListView.getItems().add("["+packet.getTimestamp()+"]"+"["+packet.getSender()+"] "+packet.getMessage());
+                display="["+packet.getTimestamp()+"]"+"["+packet.getSender()+"] "+packet.getMessage();
                 break;
             case "DM":
-                messageListView.getItems().add("["+packet.getTimestamp()+"]"+"[DM FROM "+packet.getSender()+"] "+packet.getMessage());
+                display="["+packet.getTimestamp()+"]"+"[DM FROM "+packet.getSender()+"] "+packet.getMessage();
                 break;
             case "SYSTEM", "LEAVE":
-                messageListView.getItems().add("["+packet.getTimestamp()+"]"+"[SYSTEM] "+packet.getMessage());
+                display="["+packet.getTimestamp()+"]"+"[SYSTEM] "+packet.getMessage();
                 break;
             case "USERS":
                 updateOnlineUsers(packet.getMessage());
                 break;
+            case "TYPING":
+                showTypingIndicator(packet.getSender());
+        }
+        if (!display.isEmpty()){
+            allMessages.add(display);
+        }
+    }
+
+    private void showTypingIndicator(String username) {
+        typingUsers.add(username);
+        updateTypingLabel();
+//        typingLabel.setText(username+" is typing...");   OLD
+        PauseTransition pause = new PauseTransition(Duration.seconds(2));
+        pause.setOnFinished(e->{
+            typingUsers.remove(username);
+//            typingLabel.setText(""); ->OLD
+            updateTypingLabel();
+        });
+        pause.play();
+    }
+
+    private void updateTypingLabel() {
+        if (typingUsers.isEmpty()){
+            typingLabel.setText("");
+            return;
+        }
+        else{
+            String users = String.join(",", typingUsers);
+            if (typingUsers.size() == 1) {
+                typingLabel.setText(users+ " is typing");
+            }
+            else{
+                typingLabel.setText(users+ "are typing");
+            }
         }
     }
 

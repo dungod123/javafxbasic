@@ -105,6 +105,17 @@ public class ClientHandler implements Runnable{
             case "LEAVE":
                 leaveChatRoom();
                 break;
+            case "TYPING":
+                broadcastTyping(packet);
+        }
+    }
+
+    private void broadcastTyping(Packet packet) {
+        for (ClientHandler client:clients){
+            //khong gui lai cho sender (dont show sender : YOU are typing...)
+            if (!client.username.equals(packet.getSender())) {
+                client.out.println(gson.toJson(packet));
+            }
         }
     }
 

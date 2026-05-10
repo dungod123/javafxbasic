@@ -36,5 +36,6 @@
    <TextField fx:id="recipientField" layoutX="138.0" layoutY="25.0" promptText="recipient" />
    <TextField fx:id="searchField" layoutX="600.0" layoutY="430.0" promptText="search message" />
    <Button layoutX="636.0" layoutY="466.0" mnemonicParsing="false" onAction="#handleSearch" prefHeight="18.0" prefWidth="86.0" text="search" />
+   <Label fx:id="typingLabel" layoutX="20.0" layoutY="400.0" prefHeight="18.0" prefWidth="219.0" style="-fx-background-color: #1234;" />
 
 </AnchorPane>
