@@ -30,3 +30,21 @@ REST API
 Spring Boot
 JWT
 connection pool
+
+🔥 Good feature ideas
+Feature	Difficulty	Value
+Message history	medium	huge
+Typing indicator	medium	realtime mastery
+Read receipts	medium	state sync
+Friend system	medium	relational DB
+Chat rooms	high	architecture
+File sending	high	streaming
+Notifications	medium	async events
+Profile avatars	easy	polish
+Search messages	medium	SQL skills
+😏 KHÔNG recommend ngay:
+Feature	Why
+Video call	insanely hard
+Auction system	concurrency hell
+E2E encryption	advanced crypto
+P2P networking

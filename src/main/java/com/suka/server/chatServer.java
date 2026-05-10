@@ -5,6 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * Starts the chat server and accepts client connections on port 9999.
@@ -16,7 +17,7 @@ public class chatServer {
     /**
      * Connected clients that currently participate in the chat room.
      */
-    public static Set<ClientHandler> clients = new HashSet<>();
+    public static Set<ClientHandler> clients = new CopyOnWriteArraySet<>();
 
     /**
      * Boots the chat server and keeps accepting new clients until the process stops.

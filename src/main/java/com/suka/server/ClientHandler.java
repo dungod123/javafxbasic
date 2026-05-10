@@ -2,8 +2,13 @@ package com.suka.server;
 
 import java.io.*;
 import java.net.Socket;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import com.google.gson.Gson;
+import com.suka.model.Message;
 import com.suka.model.Packet;
+import com.suka.repository.MessageRepository;
 
 import static com.suka.server.chatServer.clients;
 
@@ -20,6 +25,7 @@ public class ClientHandler implements Runnable{
     private String username;
     private boolean left;
     private Gson gson = new Gson();
+    private MessageRepository messageRepository = new MessageRepository();
 
     /**
      * Creates a handler for one accepted client socket.
@@ -89,9 +95,11 @@ public class ClientHandler implements Runnable{
     private void handlePacket(Packet packet) {
         switch (packet.getType()){
             case "CHAT":
+                chatSaveMessage(packet);
                 broadcastChat(packet);
                 break;
             case "DM":
+                DMSaveMessage(packet);
                 sendPrivateMessage(packet);
                 break;
             case "LEAVE":
@@ -100,15 +108,25 @@ public class ClientHandler implements Runnable{
         }
     }
 
+    private void chatSaveMessage(Packet packet) {
+        Message message = new Message(packet.getSender(),null, "CHAT", packet.getMessage());
+        messageRepository.saveMessage(message);
+    }
+
+    private void DMSaveMessage(Packet packet){
+        Message message = new Message(packet.getSender(),packet.getRecipient(),"DM", packet.getMessage());
+        messageRepository.saveMessage(message);
+    }
+
     private void broadcastChat(Packet packet) {
-        packet = new Packet("CHAT",packet.getSender(),
-                null,packet.getMessage());
+        packet.setTimestamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
+        packet = new Packet("CHAT",packet.getSender(), null,packet.getMessage());
         broadcast(packet);
     }
 
     private void sendPrivateMessage(Packet packet) {
-        packet = new Packet("DM",packet.getSender(),
-                packet.getRecipient(), packet.getMessage());
+        packet = new Packet("DM",packet.getSender(), packet.getRecipient(), packet.getMessage());
+        packet.setTimestamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
         String json = gson.toJson(packet);
         for (ClientHandler client:clients){
             if (client.username.equals(packet.getRecipient())){
@@ -123,8 +141,8 @@ public class ClientHandler implements Runnable{
         left = true;
 
         chatServer.clients.remove(this);
-        Packet packet = new Packet("LEAVE","SYSTEM",
-                null,username+" LEFT THE CHAT");
+        Packet packet = new Packet("LEAVE","SYSTEM", null,username+" LEFT THE CHAT");
+        //packet.setTimestamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
         String json = gson.toJson(packet);
         broadcast(packet);
         broadcastUsers();
@@ -137,6 +155,7 @@ public class ClientHandler implements Runnable{
      *
      */
     public void broadcast(Packet packet){
+        packet.setTimestamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
         String json = gson.toJson(packet);
         for (ClientHandler client : chatServer.clients){
             client.out.println(json);

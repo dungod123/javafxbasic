@@ -1,7 +1,9 @@
 package com.suka.controller;
 
 import com.suka.client.SocketClient;
+import com.suka.model.Message;
 import com.suka.model.Packet;
+import com.suka.repository.MessageRepository;
 import com.suka.session.Session;
 import com.suka.util.Navigator;
 import javafx.application.Platform;
@@ -15,6 +17,10 @@ import com.google.gson.Gson;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.time.format.DateTimeFormatter;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * JavaFX controller for the chat room screen.
@@ -45,6 +51,13 @@ public class ChatController {
 
     private volatile boolean listening;
 
+    private MessageRepository messageRepository = new MessageRepository();
+
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+
+    @FXML
+    private TextField searchField;
+
 
 
     @FXML
@@ -56,6 +69,7 @@ public class ChatController {
         usernameLabel.setText(Session.getCurrentUser().getUsername());
 
         try {
+            loadRecentMessages();
             socketClient = new SocketClient(Session.getCurrentUser().getUsername());
         } catch (IllegalStateException e) {
             messageListView.getItems().add("Cannot connect to chat server. Start server on port 9999.");
@@ -64,6 +78,28 @@ public class ChatController {
 
         startMessageListener();
 
+    }
+
+    private void loadRecentMessages() {
+        messageListView
+                .getItems()
+                .clear();
+        List<Message> messages = messageRepository.getRecentMessages();
+        Collections.reverse(messages);
+        for (Message message : messages){
+            String time = message.getCreatedAt().toLocalDateTime().format(formatter);
+            String display = "["+time+"]";
+            if ("DM".equals(message.getType())){
+                display +="[DM FROM "+message.getSender()+"] "+message.getContent();
+            }
+            else if ("CHAT".equals(message.getType())){
+                display +="[" + message.getSender() +"] "+message.getContent();
+            }
+            
+            if (!display.isEmpty()) {
+                messageListView.getItems().add(display);
+            }
+        }
     }
 
     /**
@@ -105,13 +141,13 @@ public class ChatController {
     private void handlePacket(Packet packet) {
         switch (packet.getType()){
             case "CHAT":
-                messageListView.getItems().add("["+packet.getSender()+"] "+packet.getMessage());
+                messageListView.getItems().add("["+packet.getTimestamp()+"]"+"["+packet.getSender()+"] "+packet.getMessage());
                 break;
             case "DM":
-                messageListView.getItems().add("[DM FROM "+packet.getSender()+"] "+packet.getMessage());
+                messageListView.getItems().add("["+packet.getTimestamp()+"]"+"[DM FROM "+packet.getSender()+"] "+packet.getMessage());
                 break;
             case "SYSTEM", "LEAVE":
-                messageListView.getItems().add("[SYSTEM] "+packet.getMessage());
+                messageListView.getItems().add("["+packet.getTimestamp()+"]"+"[SYSTEM] "+packet.getMessage());
                 break;
             case "USERS":
                 updateOnlineUsers(packet.getMessage());
@@ -186,5 +222,29 @@ public class ChatController {
         Navigator.switchScene("dashboard.fxml");
     }
 
+    @FXML
+    public void handleSearch(){
+        String keyword = searchField.getText();
+        if (keyword.isBlank()){
+            loadRecentMessages();
+            return;
+        }
+        else {
+            messageListView.getItems().clear();
+            List<Message> messages=messageRepository.searchMessages(keyword);
+            Collections.reverse(messages);
+            for (Message message:messages){
+                String time = message.getCreatedAt().toLocalDateTime().format(formatter);
 
+                String display = "["+time+"]";
+                if ("DM".equals(message.getType())){
+                    display +="[DM FROM "+message.getSender()+"] "+message.getContent();
+                }
+                else if ("CHAT".equals(message.getType())){
+                    display +="[" + message.getSender() +"] "+message.getContent();
+                }
+                messageListView.getItems().add(display);
+            }
+        }
+    }
 }

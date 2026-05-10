@@ -8,6 +8,7 @@ public class Packet {
     private String sender;
     private String recipient;
     private String message;
+    private String timestamp;
 
     public Packet(){
     }
@@ -48,5 +49,13 @@ public class Packet {
 
     public void setRecipient(String recipient) {
         this.recipient = recipient;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(String timeStamp) {
+        this.timestamp = timeStamp;
     }
 }
